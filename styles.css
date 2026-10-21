@@ -1,0 +1,1072 @@
+/* ═══════════════════════════════════════════════════════════════
+   赛博朋克生日贺卡 - 样式表
+   styles.css
+   ═══════════════════════════════════════════════════════════════ */
+
+/* ═══════════════════════════════════════════════════════════════
+   CSS变量配置区 - 所有可自定义参数集中管理
+   ═══════════════════════════════════════════════════════════════ */
+:root {
+    /* 配色方案 */
+    --bg-primary: #080812;
+    --bg-secondary: #0d0d1a;
+    --neon-cyan: #22d3ee;
+    --neon-pink: #ff4dd2;
+    --neon-purple: #a78bfa;
+    --neon-green: #00ff9f;
+    --text-primary: #e0e0e0;
+    --text-dim: #666680;
+
+    /* 特效开关 */
+    --glitch-enabled: 1;           /* Glitch故障效果开关: 1开启 0关闭 */
+    --scanline-enabled: 1;         /* 扫描线效果开关: 1开启 0关闭 */
+    --particles-enabled: 1;        /* 粒子背景开关: 1开启 0关闭 */
+
+    /* 动画参数 */
+    --typewriter-speed: 80;        /* 打字速度(ms/字) */
+    --particle-count: 50;          /* 粒子数量 */
+    --glow-intensity: 0.8;         /* 发光强度 */
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   基础重置与全局样式
+   ═══════════════════════════════════════════════════════════════ */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    min-height: 100vh;
+    min-height: 100dvh;
+    overflow-x: hidden;
+    background: var(--bg-primary);
+    font-family: 'JetBrains Mono', Consolas, 'Courier New', monospace;
+    color: var(--text-primary);
+    -webkit-text-size-adjust: 100%;
+    -webkit-tap-highlight-color: transparent;
+    touch-action: manipulation;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Canvas背景层 - 动态粒子与噪点
+   ═══════════════════════════════════════════════════════════════ */
+#particle-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 0;
+    pointer-events: none;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   扫描线效果层
+   ═══════════════════════════════════════════════════════════════ */
+.scanlines {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 1;
+    pointer-events: none;
+    background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0, 0, 0, 0.1) 2px,
+        rgba(0, 0, 0, 0.1) 4px
+    );
+    animation: scanlines-move 8s linear infinite;
+    opacity: 0.3;
+}
+
+@keyframes scanlines-move {
+    0% { background-position: 0 0; }
+    100% { background-position: 0 100%; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   阶段1: 启动加载页
+   ═══════════════════════════════════════════════════════════════ */
+.boot-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    background: var(--bg-primary);
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: max(20px, env(safe-area-inset-top)) 20px max(20px, env(safe-area-inset-bottom)) 20px;
+    transition: opacity 0.5s ease;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.boot-screen.hidden {
+    opacity: 0;
+    pointer-events: none;
+}
+
+.boot-content {
+    width: 100%;
+    max-width: 700px;
+    padding: 20px 0;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+.boot-text {
+    font-size: clamp(12px, 2.5vw, 15px);
+    color: var(--neon-cyan);
+    text-shadow: 0 0 8px var(--neon-cyan);
+    margin: 6px 0;
+    text-align: left;
+    width: 100%;
+    min-height: 22px;
+    opacity: 0;
+    transform: translateY(4px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    line-height: 1.4;
+}
+
+.boot-text.visible {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.boot-text .line-prefix {
+    color: var(--neon-green);
+    margin-right: 8px;
+    opacity: 0.7;
+}
+
+.boot-text .status {
+    color: var(--neon-pink);
+    margin-left: 8px;
+    font-weight: 700;
+}
+
+.boot-text .timestamp {
+    color: var(--text-dim);
+    margin-right: 10px;
+    font-size: 0.9em;
+}
+
+.cursor {
+    display: inline-block;
+    width: 9px;
+    height: 16px;
+    background: var(--neon-cyan);
+    box-shadow: 0 0 8px var(--neon-cyan);
+    animation: blink 0.7s steps(2) infinite;
+    vertical-align: text-bottom;
+    margin-left: 2px;
+    will-change: opacity;
+}
+
+@keyframes blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+}
+
+.progress-bar {
+    width: 100%;
+    max-width: 700px;
+    height: 22px;
+    border: 2px solid var(--neon-cyan);
+    margin-top: 30px;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 0 10px var(--neon-cyan), inset 0 0 10px rgba(34, 211, 238, 0.2);
+    background: rgba(13, 13, 26, 0.5);
+}
+
+.progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink));
+    width: 0%;
+    /* 不设置 transition：由 JS 的 requestAnimationFrame 直接控制，每帧都更新 */
+    box-shadow: 0 0 20px var(--neon-cyan);
+    position: relative;
+    will-change: width;
+}
+
+/* 进度条上的扫描光带 */
+.progress-fill::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    right: 0;
+    width: 20px;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.6), transparent);
+    animation: progress-shine 1.5s ease-in-out infinite;
+}
+
+@keyframes progress-shine {
+    0% { transform: translateX(-20px); opacity: 0; }
+    50% { opacity: 1; }
+    100% { transform: translateX(20px); opacity: 0; }
+}
+
+.progress-text {
+    text-align: center;
+    color: var(--neon-cyan);
+    font-size: clamp(10px, 2vw, 12px);
+    margin-top: 8px;
+    text-shadow: 0 0 5px var(--neon-cyan);
+    font-family: inherit;
+}
+
+.press-key {
+    margin-top: 40px;
+    font-size: clamp(14px, 3vw, 18px);
+    color: var(--neon-pink);
+    text-shadow: 0 0 10px var(--neon-pink), 0 0 30px var(--neon-pink);
+    animation: pulse 1.5s ease-in-out infinite;
+    cursor: pointer;
+}
+
+@keyframes pulse {
+    0%, 100% { opacity: 1; transform: scale(1); }
+    50% { opacity: 0.7; transform: scale(1.02); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   阶段2: 主内容区
+   ═══════════════════════════════════════════════════════════════ */
+.main-content {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100vh;
+    height: 100dvh;
+    z-index: 50;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    padding: max(20px, env(safe-area-inset-top)) 16px max(20px, env(safe-area-inset-bottom)) 16px;
+    opacity: 0;
+    transition: opacity 0.8s ease;
+    pointer-events: none;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+.main-content.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+/* 终端卡片框 */
+.terminal-card {
+    background: rgba(13, 13, 26, 0.95);
+    border: 2px solid var(--neon-cyan);
+    border-radius: 8px;
+    padding: clamp(20px, 5vw, 40px);
+    max-width: 700px;
+    width: 90%;
+    box-shadow:
+        0 0 20px rgba(34, 211, 238, 0.3),
+        0 0 40px rgba(34, 211, 238, 0.1),
+        inset 0 0 20px rgba(34, 211, 238, 0.05);
+    position: relative;
+    overflow: hidden;
+}
+
+/* 终端卡片顶部装饰条 */
+.terminal-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--neon-cyan), var(--neon-pink), var(--neon-purple));
+}
+
+/* 标题区域 */
+.title-container {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.main-title {
+    font-size: clamp(24px, 6vw, 48px);
+    font-weight: 700;
+    color: var(--neon-pink);
+    text-shadow:
+        0 0 10px var(--neon-pink),
+        0 0 20px var(--neon-pink),
+        0 0 40px var(--neon-pink),
+        0 0 80px var(--neon-pink);
+    animation: glitch-text 3s infinite;
+    cursor: pointer;
+    user-select: none;
+}
+
+@keyframes glitch-text {
+    0%, 90%, 100% {
+        transform: translate(0);
+        text-shadow:
+            0 0 10px var(--neon-pink),
+            0 0 20px var(--neon-pink),
+            0 0 40px var(--neon-pink);
+    }
+    92% {
+        transform: translate(-2px, 1px);
+        text-shadow:
+            -2px 0 var(--neon-cyan),
+            2px 0 var(--neon-pink);
+    }
+    94% {
+        transform: translate(2px, -1px);
+        text-shadow:
+            2px 0 var(--neon-cyan),
+            -2px 0 var(--neon-pink);
+    }
+    96% {
+        transform: translate(-1px, 2px);
+        text-shadow:
+            -1px 0 var(--neon-purple),
+            1px 0 var(--neon-cyan);
+    }
+}
+
+/* 祝福语区域 */
+.wishes-container {
+    min-height: 200px;
+    margin-bottom: 30px;
+}
+
+.wish-line {
+    font-size: clamp(14px, 3vw, 18px);
+    color: var(--neon-cyan);
+    margin: 12px 0;
+    opacity: 0;
+    text-shadow: 0 0 8px var(--neon-cyan);
+    display: flex;
+    align-items: flex-start;
+}
+
+.wish-line.visible {
+    opacity: 1;
+}
+
+.wish-line::before {
+    content: '>';
+    color: var(--neon-green);
+    margin-right: 10px;
+    flex-shrink: 0;
+}
+
+.wish-line .cursor-small {
+    display: inline-block;
+    width: 8px;
+    height: 16px;
+    background: var(--neon-cyan);
+    animation: blink 0.8s infinite;
+    vertical-align: middle;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   交互按钮区
+   ═══════════════════════════════════════════════════════════════ */
+.buttons-container {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.cyber-btn {
+    background: transparent;
+    border: 2px solid var(--neon-purple);
+    color: var(--neon-purple);
+    font-family: inherit;
+    font-size: clamp(13px, 2.8vw, 15px);
+    padding: 14px 24px;
+    min-height: 48px;
+    cursor: pointer;
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    border-radius: 4px;
+    text-shadow: 0 0 8px var(--neon-purple);
+    box-shadow: 0 0 10px rgba(167, 139, 250, 0.3);
+    touch-action: manipulation;
+    -webkit-user-select: none;
+    user-select: none;
+}
+
+.cyber-btn::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.3), transparent);
+    transition: left 0.5s ease;
+}
+
+.cyber-btn:hover::before {
+    left: 100%;
+}
+
+.cyber-btn:active {
+    transform: scale(0.98);
+}
+
+.cyber-btn.active {
+    background: var(--neon-purple);
+    color: var(--bg-primary);
+}
+
+/* 仅在真正支持 hover 的设备（桌面鼠标）上启用 hover 缩放
+   触屏设备点击后 :hover 会粘住，导致按钮一直放大无法恢复 */
+@media (hover: hover) {
+    .cyber-btn:hover {
+        transform: scale(1.05);
+        box-shadow:
+            0 0 20px rgba(167, 139, 250, 0.5),
+            0 0 40px rgba(167, 139, 250, 0.3);
+        animation: btn-glitch 0.3s ease;
+    }
+}
+
+@keyframes btn-glitch {
+    0%, 100% { transform: scale(1.05) translate(0); }
+    25% { transform: scale(1.05) translate(-1px, 1px); }
+    50% { transform: scale(1.05) translate(1px, -1px); }
+    75% { transform: scale(1.05) translate(-1px, -1px); }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   阶段3: 图片画廊弹窗
+   ═══════════════════════════════════════════════════════════════ */
+.gallery-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(8, 8, 18, 0.95);
+    z-index: 200;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+}
+
+.gallery-modal.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.gallery-container {
+    width: 90%;
+    max-width: 600px;
+    text-align: center;
+}
+
+.gallery-title {
+    font-size: 18px;
+    color: var(--neon-cyan);
+    margin-bottom: 20px;
+    text-shadow: 0 0 10px var(--neon-cyan);
+}
+
+.gallery-image {
+    width: 100%;
+    max-height: 60vh;
+    border: 2px solid var(--neon-purple);
+    border-radius: 8px;
+    box-shadow: 0 0 30px rgba(167, 139, 250, 0.3);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    background: var(--bg-secondary);
+    overflow: hidden;
+    min-height: 300px;
+}
+
+.gallery-image img {
+    max-width: 100%;
+    max-height: 60vh;
+    object-fit: contain;
+}
+
+.gallery-nav {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+    gap: 15px;
+}
+
+.gallery-nav button {
+    flex: 1;
+}
+
+.gallery-close {
+    margin-top: 20px;
+    width: 100%;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   奶茶祝福弹窗
+   ═══════════════════════════════════════════════════════════════ */
+.milktea-modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(8, 8, 18, 0.92);
+    z-index: 220;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: max(24px, env(safe-area-inset-top)) 20px max(24px, env(safe-area-inset-bottom));
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s ease;
+    backdrop-filter: blur(6px);
+}
+
+.milktea-modal.visible {
+    opacity: 1;
+    pointer-events: all;
+}
+
+.milktea-card {
+    width: 100%;
+    max-width: 460px;
+    background: rgba(13, 13, 26, 0.95);
+    border: 2px solid var(--neon-pink, #ff4dd2);
+    border-radius: 12px;
+    padding: clamp(24px, 5vw, 36px);
+    text-align: center;
+    box-shadow:
+        0 0 30px rgba(255, 77, 210, 0.35),
+        inset 0 0 20px rgba(167, 139, 250, 0.08);
+    transform: translateY(12px) scale(0.96);
+    transition: transform 0.35s cubic-bezier(.2,.7,.3,1.2);
+}
+
+.milktea-modal.visible .milktea-card {
+    transform: translateY(0) scale(1);
+}
+
+.milktea-sticker {
+    font-size: clamp(40px, 9vw, 56px);
+    line-height: 1;
+    margin-bottom: 14px;
+    filter: drop-shadow(0 0 12px rgba(255, 77, 210, 0.55));
+    animation: milktea-bob 2.4s ease-in-out infinite;
+}
+
+@keyframes milktea-bob {
+    0%, 100% { transform: translateY(0) rotate(-3deg); }
+    50% { transform: translateY(-6px) rotate(3deg); }
+}
+
+.milktea-title {
+    font-size: clamp(13px, 3vw, 16px);
+    color: var(--neon-cyan, #22d3ee);
+    letter-spacing: 0.25em;
+    margin-bottom: 18px;
+    text-shadow: 0 0 10px var(--neon-cyan, #22d3ee);
+}
+
+.milktea-message {
+    color: var(--ink, #f5f3ff);
+    font-size: clamp(15px, 3.6vw, 18px);
+    line-height: 1.8;
+    letter-spacing: 0.04em;
+    margin: 0 0 22px;
+    text-shadow: 0 0 6px rgba(199, 167, 255, 0.35);
+}
+
+.milktea-redpacket {
+    display: inline-flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 18px;
+    margin-bottom: 24px;
+    background: rgba(255, 77, 210, 0.1);
+    border: 1px dashed rgba(255, 77, 210, 0.6);
+    border-radius: 8px;
+    color: var(--neon-pink, #ff4dd2);
+    font-size: clamp(13px, 3vw, 15px);
+    letter-spacing: 0.08em;
+    text-shadow: 0 0 6px rgba(255, 77, 210, 0.55);
+}
+
+.milktea-redpacket-label {
+    color: rgba(245, 243, 255, 0.7);
+    text-shadow: none;
+}
+
+.milktea-redpacket-code {
+    font-weight: 700;
+}
+
+.milktea-close {
+    width: 100%;
+}
+
+/* 触屏设备防 :hover 粘住 */
+@media (hover: hover) {
+    .milktea-close:hover {
+        transform: scale(1.05);
+        box-shadow:
+            0 0 20px rgba(167, 139, 250, 0.5),
+            0 0 40px rgba(167, 139, 250, 0.3);
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   弹幕效果层
+   ═══════════════════════════════════════════════════════════════ */
+.danmaku-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 150;
+    pointer-events: none;
+    overflow: hidden;
+}
+
+.danmaku-item {
+    position: absolute;
+    white-space: nowrap;
+    font-weight: 600;
+    will-change: transform, opacity;
+    font-family: 'Courier New', monospace;
+}
+
+/* ========== 样式1：默认霓虹飞行 ========== */
+.danmaku-style-default {
+    font-size: clamp(14px, 2.8vw, 20px);
+    animation: danmaku-fly 10s linear forwards;
+    text-shadow:
+        0 0 4px currentColor,
+        0 0 10px currentColor,
+        0 0 18px currentColor;
+}
+
+/* ========== 样式2：赛博方块（带边框背景） ========== */
+.danmaku-style-block {
+    font-size: clamp(12px, 2.4vw, 17px);
+    padding: 4px 12px;
+    background: rgba(13, 13, 26, 0.7);
+    border: 1.5px solid currentColor;
+    box-shadow:
+        0 0 6px currentColor,
+        inset 0 0 8px currentColor;
+    animation: danmaku-fly 11s linear forwards;
+    letter-spacing: 1px;
+}
+
+/* ========== 样式3：超大大表情 ========== */
+.danmaku-style-emoji {
+    font-size: clamp(28px, 6vw, 48px);
+    animation: danmaku-fly-bounce 8s linear forwards;
+    filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.5));
+}
+
+/* ========== 样式4：渐变光带 ========== */
+.danmaku-style-gradient {
+    font-size: clamp(16px, 3.2vw, 24px);
+    font-weight: 800;
+    background: linear-gradient(90deg, #22d3ee, #ff4dd2, #a78bfa, #00ff9f);
+    background-size: 200% 100%;
+    -webkit-background-clip: text;
+    background-clip: text;
+    -webkit-text-fill-color: transparent;
+    animation: danmaku-fly-gradient 12s linear forwards;
+    filter: drop-shadow(0 0 6px rgba(255, 77, 210, 0.6));
+}
+
+/* ========== 样式5：故障风（带偏移伪影） ========== */
+.danmaku-style-glitch {
+    font-size: clamp(14px, 2.8vw, 20px);
+    animation: danmaku-fly 9s linear forwards;
+    text-shadow:
+        2px 0 #ff4dd2,
+        -2px 0 #22d3ee,
+        0 0 8px currentColor;
+    letter-spacing: 2px;
+}
+
+/* ========== 样式6：代码风带括号 ========== */
+.danmaku-style-code {
+    font-size: clamp(12px, 2.4vw, 16px);
+    padding: 3px 10px;
+    background: rgba(0, 255, 159, 0.08);
+    border-left: 3px solid currentColor;
+    color: #00ff9f !important;
+    animation: danmaku-fly 10s linear forwards;
+    text-shadow: 0 0 4px currentColor;
+}
+
+/* ========== 样式7：超大字慢飘 ========== */
+.danmaku-style-huge {
+    font-size: clamp(32px, 7vw, 60px);
+    font-weight: 900;
+    animation: danmaku-fly-slow 14s linear forwards;
+    text-shadow:
+        0 0 8px currentColor,
+        0 0 20px currentColor,
+        0 0 40px currentColor;
+    letter-spacing: 3px;
+}
+
+/* ========== 关键帧：水平飞行 ========== */
+@keyframes danmaku-fly {
+    0% {
+        transform: translateX(100vw);
+        opacity: 0;
+    }
+    5% { opacity: 1; }
+    90% { opacity: 1; }
+    100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+/* ========== 关键帧：弹跳飞行 ========== */
+@keyframes danmaku-fly-bounce {
+    0% {
+        transform: translateX(100vw) scale(0) rotate(0deg);
+        opacity: 0;
+    }
+    10% {
+        transform: translateX(80vw) scale(1.3) rotate(15deg);
+        opacity: 1;
+    }
+    25% {
+        transform: translateX(60vw) scale(0.9) rotate(-10deg);
+    }
+    40% {
+        transform: translateX(40vw) scale(1.1) rotate(8deg);
+    }
+    60% {
+        transform: translateX(20vw) scale(0.95) rotate(-5deg);
+    }
+    80% {
+        transform: translateX(0) scale(1.05) rotate(2deg);
+    }
+    100% {
+        transform: translateX(-50%) scale(0.8) rotate(0deg);
+        opacity: 0;
+    }
+}
+
+/* ========== 关键帧：渐变流动 ========== */
+@keyframes danmaku-fly-gradient {
+    0% {
+        transform: translateX(100vw);
+        opacity: 0;
+        background-position: 0% 50%;
+    }
+    10% { opacity: 1; }
+    90% { opacity: 1; }
+    100% {
+        transform: translateX(-100%);
+        opacity: 0;
+        background-position: 200% 50%;
+    }
+}
+
+/* ========== 关键帧：慢飘 ========== */
+@keyframes danmaku-fly-slow {
+    0% {
+        transform: translateX(100vw);
+        opacity: 0;
+    }
+    15% { opacity: 1; }
+    85% { opacity: 1; }
+    100% {
+        transform: translateX(-100%);
+        opacity: 0;
+    }
+}
+
+/* ========== 关键帧：垂直上升 ========== */
+@keyframes danmaku-rise {
+    0% {
+        transform: translateY(0) scale(0.5);
+        opacity: 0;
+    }
+    20% {
+        transform: translateY(-20vh) scale(1.2);
+        opacity: 1;
+    }
+    80% {
+        transform: translateY(-80vh) scale(1);
+        opacity: 1;
+    }
+    100% {
+        transform: translateY(-110vh) scale(0.7);
+        opacity: 0;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Matrix数字雨特效
+   ═══════════════════════════════════════════════════════════════ */
+#matrix-canvas {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 300;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+}
+
+#matrix-canvas.active {
+    opacity: 1;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   底部签名
+   ═══════════════════════════════════════════════════════════════ */
+.footer-signature {
+    position: fixed;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: clamp(10px, 2vw, 12px);
+    color: var(--text-dim);
+    text-align: center;
+    z-index: 60;
+    animation: breathe 3s ease-in-out infinite;
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+@keyframes breathe {
+    0%, 100% { opacity: 0.4; }
+    50% { opacity: 0.8; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   Glitch故障闪烁效果
+   ═══════════════════════════════════════════════════════════════ */
+.glitch-flash {
+    animation: screen-glitch 0.3s ease;
+}
+
+@keyframes screen-glitch {
+    0% { filter: none; }
+    20% { filter: hue-rotate(90deg) saturate(2); }
+    40% { filter: hue-rotate(-90deg) brightness(1.5); }
+    60% { filter: invert(0.1); }
+    80% { filter: hue-rotate(180deg); }
+    100% { filter: none; }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   响应式适配
+   ═══════════════════════════════════════════════════════════════ */
+/* 平板 / 手机 (≤ 768px) */
+@media (max-width: 768px) {
+    .terminal-card {
+        padding: 22px 18px;
+        width: 95%;
+    }
+
+    .main-title {
+        font-size: clamp(22px, 7vw, 36px);
+        line-height: 1.2;
+    }
+
+    .subtitle {
+        font-size: clamp(12px, 3vw, 15px);
+    }
+
+    .buttons-container {
+        flex-direction: column;
+        gap: 12px;
+        width: 100%;
+    }
+
+    .cyber-btn {
+        width: 100%;
+        padding: 16px 20px;
+        min-height: 52px;
+        font-size: 14px;
+    }
+
+    .wish-line {
+        font-size: 14px;
+        line-height: 1.6;
+    }
+
+    .boot-text {
+        font-size: 12px;
+        line-height: 1.5;
+        word-break: break-all;
+    }
+
+    .gallery-container {
+        width: 95%;
+        padding: 0 8px;
+    }
+
+    .gallery-image {
+        max-height: 50vh;
+    }
+
+    .gallery-title {
+        font-size: 16px;
+    }
+
+    .footer-signature {
+        font-size: 10px;
+        bottom: 12px;
+        padding: 0 20px;
+    }
+}
+
+/* 小屏手机 (≤ 480px) */
+@media (max-width: 480px) {
+    .terminal-card {
+        padding: 18px 14px;
+        border-radius: 6px;
+    }
+
+    .main-title {
+        font-size: clamp(20px, 8vw, 30px);
+        letter-spacing: 1px;
+    }
+
+    .subtitle {
+        font-size: 11px;
+    }
+
+    .terminal-card::before {
+        height: 3px;
+    }
+
+    .cyber-btn {
+        padding: 14px 16px;
+        font-size: 13px;
+        letter-spacing: 0.5px;
+    }
+
+    .wish-line {
+        font-size: 13px;
+        line-height: 1.7;
+    }
+
+    .boot-text {
+        font-size: 11px;
+        line-height: 1.5;
+    }
+
+    .progress-text {
+        font-size: 11px;
+    }
+
+    .gallery-image {
+        max-height: 45vh;
+    }
+
+    .gallery-title {
+        font-size: 14px;
+        margin-bottom: 14px;
+    }
+
+    /* 弹幕在手机上稍微再小一点 */
+    .danmaku-style-default { font-size: 14px; }
+    .danmaku-style-emoji { font-size: 28px; }
+    .danmaku-style-huge { font-size: 32px; }
+}
+
+/* 横屏手机 / 小高度窗口 (≤ 500px 高) */
+@media (max-height: 500px) and (orientation: landscape) {
+    .main-content {
+        justify-content: flex-start;
+        padding-top: max(12px, env(safe-area-inset-top));
+    }
+
+    .terminal-card {
+        padding: 16px 20px;
+    }
+
+    .main-title {
+        font-size: 24px;
+        margin-bottom: 6px;
+    }
+
+    .buttons-container {
+        flex-direction: row;
+        flex-wrap: wrap;
+        gap: 10px;
+    }
+
+    .cyber-btn {
+        padding: 10px 16px;
+        min-height: 42px;
+        font-size: 12px;
+        flex: 1 1 calc(50% - 5px);
+    }
+
+    .footer-signature {
+        display: none;
+    }
+}
+
+/* 超大屏 (> 1400px) */
+@media (min-width: 1400px) {
+    .terminal-card {
+        max-width: 800px;
+    }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   隐藏元素
+   ═══════════════════════════════════════════════════════════════ */
+.hidden {
+    display: none !important;
+}
+
+/* 移动端：防止文字被选中（除输入框） */
+@media (max-width: 768px) {
+    body, button, h1, p, div, span {
+        -webkit-user-select: none;
+        -moz-user-select: none;
+        user-select: none;
+    }
+
+    input, textarea {
+        -webkit-user-select: text;
+        user-select: text;
+    }
+}

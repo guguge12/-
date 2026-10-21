@@ -1,0 +1,339 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#070817">
+  <title>叉宝的回忆录</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f3f1ff;
+      --muted: #aaa9c5;
+      --lavender: #c7a7ff;
+      --scene-progress: 0;
+      font-family: Inter, "SF Pro Display", "PingFang SC", "Microsoft YaHei", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    html { background: #070817; scroll-behavior: smooth; }
+    body { margin: 0; color: var(--ink); background: #070817; }
+    .memory-experience { position: relative; isolation: isolate; overflow: clip; background: #070817; }
+    .scroll-track { height: 500vh; position: relative; }
+    .universe {
+      position: sticky;
+      top: 0;
+      height: 100svh;
+      min-height: 560px;
+      overflow: hidden;
+      background:
+        radial-gradient(ellipse 72% 34% at 53% 104%, rgba(159, 119, 213, .52), transparent 76%),
+        radial-gradient(ellipse 96% 42% at 42% 98%, rgba(91, 105, 190, .38), transparent 78%),
+        radial-gradient(ellipse 68% 35% at 88% 76%, rgba(49, 65, 139, .23), transparent 78%),
+        radial-gradient(ellipse 78% 50% at 8% 72%, rgba(35, 48, 110, .36), transparent 76%),
+        linear-gradient(180deg, #03040d 0%, #070a1d 38%, #111832 70%, #242343 100%);
+      perspective: 900px;
+    }
+    .universe::before, .universe::after {
+      content: ""; position: absolute; inset: -10%; pointer-events: none;
+    }
+    .universe::before {
+      opacity: .78;
+      background-image:
+        radial-gradient(1px 1px at 7% 15%, #fff 98%, transparent), radial-gradient(1px 1px at 18% 55%, #b9c9ff 98%, transparent),
+        radial-gradient(1px 1px at 29% 28%, #fff 98%, transparent), radial-gradient(1.5px 1.5px at 41% 69%, #d5caff 98%, transparent),
+        radial-gradient(1px 1px at 54% 18%, #fff 98%, transparent), radial-gradient(1px 1px at 66% 47%, #d3ddff 98%, transparent),
+        radial-gradient(1.5px 1.5px at 78% 23%, #fff 98%, transparent), radial-gradient(1px 1px at 89% 62%, #c6bbff 98%, transparent),
+        radial-gradient(1px 1px at 96% 11%, #fff 98%, transparent), radial-gradient(1px 1px at 11% 89%, #fff 98%, transparent),
+        radial-gradient(1px 1px at 35% 88%, #d1d8ff 98%, transparent), radial-gradient(1px 1px at 73% 84%, #fff 98%, transparent),
+        radial-gradient(1px 1px at 23% 8%, #fff 98%, transparent), radial-gradient(1px 1px at 47% 43%, #bfcaff 98%, transparent),
+        radial-gradient(1px 1px at 83% 91%, #fff 98%, transparent), radial-gradient(1px 1px at 62% 77%, #d9d1ff 98%, transparent);
+      background-size: 100% 100%;
+      transform: translate3d(0, calc(var(--scene-progress) * -32px), 0);
+    }
+    .universe::after {
+      background: radial-gradient(ellipse at 50% 52%, transparent 34%, rgba(2, 3, 12, .3) 76%, rgba(1, 2, 8, .64) 100%);
+    }
+    .star { position: absolute; width: 3px; height: 3px; border-radius: 50%; background: #f2eeff; box-shadow: 0 0 12px 2px rgba(200, 200, 255, .75); opacity: .7; animation: twinkle 3.5s ease-in-out infinite alternate; }
+    .star.s1 { left: 18%; top: 31%; animation-delay: -1s; }
+    .star.s2 { left: 76%; top: 24%; width: 2px; height: 2px; animation-delay: -2s; }
+    .star.s3 { left: 87%; top: 65%; animation-delay: -.4s; }
+    .star.s4 { left: 29%; top: 77%; width: 2px; height: 2px; animation-delay: -2.5s; }
+    .star.s5 { left: 58%; top: 14%; animation-delay: -1.8s; }
+    .planet { position: absolute; border-radius: 50%; pointer-events: none; will-change: transform; }
+    .planet.one {
+      width: clamp(140px, 22vw, 310px); aspect-ratio: 1; left: -9%; bottom: -17%;
+      background: radial-gradient(circle at 68% 35%, #1b2c58 0 24%, #0b1230 51%, #050817 70%);
+      box-shadow: inset -24px -12px 42px #01030b, inset 12px 3px 32px rgba(74, 112, 219, .28), -15px -8px 46px rgba(102, 133, 255, .2);
+    }
+    .planet.two {
+      width: clamp(170px, 29vw, 400px); aspect-ratio: 1; right: -10%; top: -13%;
+      background: radial-gradient(circle at 32% 35%, #a1bdff 0, #647ee1 13%, #314a9a 31%, #172455 57%, #070a1d 76%);
+      box-shadow: inset 14px 12px 35px rgba(191, 214, 255, .56), inset -24px -8px 35px rgba(1, 4, 20, .9), -18px 12px 50px rgba(100, 133, 255, .28);
+    }
+    .planet.three {
+      width: clamp(54px, 8vw, 108px); aspect-ratio: 1; right: 13%; bottom: 12%;
+      background: radial-gradient(circle at 34% 28%, #f0dfff, #c3a7f4 24%, #856bc8 53%, #41376f 78%);
+      box-shadow: inset -10px -8px 22px rgba(20, 14, 48, .8), inset 7px 4px 16px rgba(255, 239, 255, .4), 0 0 36px rgba(175, 141, 255, .28);
+    }
+    .planet.three::after { content: ""; position: absolute; width: 155%; height: 36%; left: -27%; top: 36%; border: 7px solid rgba(195, 166, 255, .68); border-left-color: rgba(195, 166, 255, .22); border-right-color: rgba(195, 166, 255, .9); border-radius: 50%; transform: rotate(-19deg); }
+    .planet.four { width: clamp(38px, 5vw, 70px); aspect-ratio: 1; left: 41%; top: 17%; background: radial-gradient(circle at 35% 30%, #8db7ff, #18295a 70%); box-shadow: 0 0 28px rgba(92, 141, 255, .22); }
+    .intro { position: absolute; inset: 0; z-index: 2; display: grid; place-content: center; text-align: center; padding: 24px; pointer-events: none; opacity: 1; transition: opacity .1s linear; }
+    .intro.is-fading { transition: none; }
+    .eyebrow { color: #c9c3e8; font-size: 10px; letter-spacing: .42em; text-transform: uppercase; margin: 0 0 18px; }
+    .intro h1 { margin: 0; font-weight: 400; font-size: clamp(25px, 4vw, 48px); letter-spacing: .18em; text-shadow: 0 0 35px rgba(165, 166, 255, .28); }
+    .intro p { margin: 16px 0 0; color: var(--muted); font-size: 12px; letter-spacing: .2em; }
+    .memory-card {
+      position: absolute; z-index: 3; top: 50%; left: 50%; width: min(290px, 34vw); min-width: 220px;
+      padding: 12px; transform: translate3d(-50%, -50%) scale(.72); opacity: 0; visibility: hidden;
+      background: rgba(13, 16, 37, .78); border: 1px solid rgba(199, 193, 255, .2); border-radius: 3px;
+      box-shadow: 0 20px 70px rgba(0, 0, 0, .4), 0 0 36px rgba(107, 122, 255, .08); backdrop-filter: blur(12px);
+      will-change: transform, opacity; transition: visibility .3s;
+    }
+    .memory-card.is-visible { visibility: visible; }
+    .memory-photo {
+      display: block; width: 100%; height: auto; overflow: hidden;
+      border: 1px solid rgba(199, 193, 255, .18);
+      background: linear-gradient(145deg, rgba(103, 117, 184, .2), rgba(13, 18, 44, .8)), radial-gradient(ellipse at 50% 100%, rgba(159, 122, 219, .18), transparent 55%);
+    }
+    .memory-card h2 { margin: 14px 2px 5px; font-size: 15px; font-weight: 400; letter-spacing: .06em; }
+    .memory-card p { margin: 0 2px 3px; color: #9b9bb7; font-size: 10px; letter-spacing: .08em; }
+    .memory-card:nth-of-type(odd) { --x: -148%; --y: -50%; }
+    .memory-card:nth-of-type(even) { --x: 48%; --y: -50%; }
+    .hud { position: absolute; z-index: 4; left: 50%; bottom: max(22px, env(safe-area-inset-bottom)); transform: translateX(-50%); width: min(310px, 62vw); text-align: center; }
+    .chapter-label { min-height: 13px; margin-bottom: 5px; color: #dad5f4; font-size: 9px; letter-spacing: .12em; }
+    .timeline { display: flex; align-items: center; justify-content: center; gap: 8px; }
+    .timeline-label { flex: 0 0 auto; color: rgba(219, 215, 243, .56); font-size: 8px; letter-spacing: .08em; }
+    .timeline input { appearance: none; -webkit-appearance: none; width: min(190px, 38vw); height: 3px; margin: 8px 0; border-radius: 3px; outline: 0; cursor: ew-resize; background: linear-gradient(to right, #d4caff 0%, #d4caff calc(var(--scene-progress) * 100%), rgba(12, 14, 28, .86) calc(var(--scene-progress) * 100%), rgba(12, 14, 28, .86) 100%); }
+    .timeline input::-webkit-slider-thumb { appearance: none; -webkit-appearance: none; width: 9px; height: 9px; border: 0; border-radius: 50%; background: #e3dcff; box-shadow: 0 0 7px rgba(220, 208, 255, .8); }
+    .timeline input::-moz-range-thumb { width: 9px; height: 9px; border: 0; border-radius: 50%; background: #e3dcff; box-shadow: 0 0 7px rgba(220, 208, 255, .8); }
+    .scroll-hint { margin-top: 5px; color: rgba(210, 208, 235, .42); font-size: 8px; letter-spacing: .08em; }
+    .closing-message {
+      position: absolute; z-index: 5; top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(.96);
+      width: min(680px, 84vw);
+      padding: 40px 48px;
+      text-align: center;
+      color: var(--ink);
+      font-size: clamp(15px, 1.8vw, 19px);
+      line-height: 2.15;
+      letter-spacing: .06em;
+      background: rgba(13, 16, 37, .62);
+      border: 1px solid rgba(199, 193, 255, .22);
+      border-radius: 4px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, .45), 0 0 50px rgba(107, 122, 255, .12);
+      opacity: 0;
+      pointer-events: none;
+    }
+    .closing-message p { margin: 0; }
+    .closing-message::before, .closing-message::after {
+      content: ""; display: block; width: 56px; height: 1px; margin: 0 auto;
+      background: linear-gradient(to right, transparent, rgba(199, 167, 255, .55), transparent);
+    }
+    .closing-message::before { margin-bottom: 22px; }
+    .closing-message::after { margin-top: 22px; }
+    @keyframes twinkle { from { opacity: .25; transform: scale(.7); } to { opacity: .95; transform: scale(1.2); } }
+    @keyframes nudge { 50% { transform: translateY(4px); } }
+    .back-button {
+      position: fixed; z-index: 10; top: max(16px, env(safe-area-inset-top)); left: max(16px, env(safe-area-inset-left));
+      display: inline-flex; align-items: center; gap: 6px;
+      padding: 8px 14px 8px 10px;
+      color: var(--ink);
+      font-family: inherit; font-size: 11px; letter-spacing: .14em;
+      background: rgba(13, 16, 37, .58);
+      border: 1px solid rgba(199, 193, 255, .22);
+      border-radius: 999px;
+      backdrop-filter: blur(10px);
+      box-shadow: 0 6px 24px rgba(0, 0, 0, .35), 0 0 18px rgba(107, 122, 255, .1);
+      cursor: pointer;
+      transition: transform .18s ease, background .18s ease, border-color .18s ease;
+      text-decoration: none;
+    }
+    .back-button:hover { background: rgba(31, 36, 74, .72); border-color: rgba(199, 193, 255, .42); transform: translateX(-2px); }
+    .back-button:focus-visible { outline: 2px solid rgba(199, 167, 255, .7); outline-offset: 3px; }
+    .back-button svg { width: 12px; height: 12px; stroke: currentColor; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+    @media (max-width: 600px) {
+      .universe { min-height: 500px; }
+      .memory-card { width: min(250px, 66vw); min-width: 0; padding: 9px; }
+      .memory-card { width: min(235px, 44vw); }
+      .memory-card:nth-of-type(odd) { --x: -108%; --y: -50%; }
+      .memory-card:nth-of-type(even) { --x: 8%; --y: -50%; }
+      .planet.one { left: -22%; bottom: -8%; }
+      .planet.two { right: -25%; top: -6%; }
+      .planet.three { right: 7%; bottom: 20%; }
+      .hud { bottom: max(24px, env(safe-area-inset-bottom)); }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; }
+    }
+  </style>
+</head>
+<body>
+  <a href="index.html" class="back-button" id="back-button" aria-label="返回主界面">
+    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M15 6l-6 6 6 6"/></svg>
+    <span>返回</span>
+  </a>
+  <main class="memory-experience" aria-label="太空回忆录">
+    <div class="scroll-track" id="scroll-track">
+      <section class="universe" id="universe" aria-label="滚动探索回忆">
+        <i class="star s1"></i><i class="star s2"></i><i class="star s3"></i><i class="star s4"></i><i class="star s5"></i>
+        <div class="planet one" data-depth=".18"></div><div class="planet two" data-depth=".32"></div>
+        <div class="planet three" data-depth=".48"></div><div class="planet four" data-depth=".24"></div>
+        <header class="intro"><p class="eyebrow">OUR LITTLE UNIVERSE</p><h1>叉宝的回忆录</h1><p>每一段回忆，都是一颗闪亮的星</p></header>
+        <article class="memory-card" data-step="1" aria-label="回忆 26-6.1">
+          <img class="memory-photo" src="photos/26_6_1.jpg" alt="26-6.1" loading="lazy"><p>26-6.1</p>
+        </article>
+        <article class="memory-card" data-step="2" aria-label="回忆 26-6.2">
+          <img class="memory-photo" src="photos/26_6_2.jpg" alt="26-6.2" loading="lazy"><p>26-6.2</p>
+        </article>
+        <article class="memory-card" data-step="3" aria-label="回忆 26-6.3">
+          <img class="memory-photo" src="photos/26_6_3.jpg" alt="26-6.3" loading="lazy"><p>26-6.3</p>
+        </article>
+        <article class="memory-card" data-step="4" aria-label="回忆 26-6.4">
+          <img class="memory-photo" src="photos/26_6_4.jpg" alt="26-6.4" loading="lazy"><p>26-6.4</p>
+        </article>
+        <article class="memory-card" data-step="5" aria-label="回忆 26-7.1">
+          <img class="memory-photo" src="photos/26_7_1.jpg" alt="26-7.1" loading="lazy"><p>26-7.1</p>
+        </article>
+        <article class="memory-card" data-step="6" aria-label="回忆 26-7.2">
+          <img class="memory-photo" src="photos/26_7_2.jpg" alt="26-7.2" loading="lazy"><p>26-7.2</p>
+        </article>
+        <article class="memory-card" data-step="7" aria-label="回忆 26-7.3">
+          <img class="memory-photo" src="photos/26_7_3.jpg" alt="26-7.3" loading="lazy"><p>26-7.3</p>
+        </article>
+        <article class="memory-card" data-step="8" aria-label="回忆 26-7.4">
+          <img class="memory-photo" src="photos/26_7_4.jpg" alt="26-7.4" loading="lazy"><p>26-7.4</p>
+        </article>
+        <article class="memory-card" data-step="9" aria-label="回忆 26-8.1">
+          <img class="memory-photo" src="photos/26_8_1.jpg" alt="26-8.1" loading="lazy"><p>26-8.1</p>
+        </article>
+        <article class="memory-card" data-step="10" aria-label="回忆 26-8.2">
+          <img class="memory-photo" src="photos/26_8_2.jpg" alt="26-8.2" loading="lazy"><p>26-8.2</p>
+        </article>
+        <article class="memory-card" data-step="11" aria-label="回忆 26-8.3">
+          <img class="memory-photo" src="photos/26_8_3.jpg" alt="26-8.3" loading="lazy"><p>26-8.3</p>
+        </article>
+        <article class="memory-card" data-step="12" aria-label="回忆 26-8.4">
+          <img class="memory-photo" src="photos/26_8_4.jpg" alt="26-8.4" loading="lazy"><p>26-8.4</p>
+        </article>
+        <article class="memory-card" data-step="13" aria-label="回忆 26-9.1">
+          <img class="memory-photo" src="photos/26_9_1.jpg" alt="26-9.1" loading="lazy"><p>26-9.1</p>
+        </article>
+        <article class="memory-card" data-step="14" aria-label="回忆 26-9.2">
+          <img class="memory-photo" src="photos/26_9_2.jpg" alt="26-9.2" loading="lazy"><p>26-9.2</p>
+        </article>
+        <article class="memory-card" data-step="15" aria-label="回忆 26-9.3">
+          <img class="memory-photo" src="photos/26_9_3.jpg" alt="26-9.3" loading="lazy"><p>26-9.3</p>
+        </article>
+        <article class="memory-card" data-step="16" aria-label="回忆 26-9.4">
+          <img class="memory-photo" src="photos/26_9_4.jpg" alt="26-9.4" loading="lazy"><p>26-9.4</p>
+        </article>
+        <article class="memory-card" data-step="17" aria-label="回忆 26_10_1">
+          <img class="memory-photo" src="photos/26_10_1.jpg" alt="26_10_1" loading="lazy"><p>26_10_1</p>
+        </article>
+        <article class="memory-card" data-step="18" aria-label="回忆 26_10_2">
+          <img class="memory-photo" src="photos/26_10_2.jpg" alt="26_10_2" loading="lazy"><p>26_10_2</p>
+        </article>
+        <article class="memory-card" data-step="19" aria-label="回忆 26_10_3">
+          <img class="memory-photo" src="photos/26_10_3.jpg" alt="26_10_3" loading="lazy"><p>26_10_3</p>
+        </article>
+        <article class="closing-message" aria-label="结尾寄语">
+          <p>回看一下，叉宝的已经出了这么多套图了，无论是月票还是周边，都有着不小的进步呢（虽然本来就非常优秀了！），有越来越多的人喜欢了，同时呢，这几个月有叉宝的陪伴，我真的很开心啊，我们的故事才刚刚开始，希望以后每天都能陪着叉宝，每个月都能看到叉宝精美的月票，每年都能陪着叉宝一起过生日！！！</p>
+        </article>
+        <nav class="hud" aria-label="回忆进度">
+          <div class="chapter-label" id="chapter-label">向下滚动，开始探索</div>
+          <div class="timeline"><span class="timeline-label">起点</span><input id="timeline-range" type="range" min="0" max="1000" value="0" aria-label="回忆进度"><span class="timeline-label">未完待续</span></div>
+          <div class="scroll-hint">滚动，继续向前</div>
+        </nav>
+      </section>
+    </div>
+  </main>
+  <script>
+    (() => {
+      const track = document.querySelector('#scroll-track');
+      const scene = document.querySelector('#universe');
+      const cards = [...document.querySelectorAll('.memory-card')];
+      const planets = [...document.querySelectorAll('.planet')];
+      const label = document.querySelector('#chapter-label');
+      const range = document.querySelector('#timeline-range');
+      const closing = document.querySelector('.closing-message');
+      const titles = ['向下滚动，开始探索', '26-6.1', '26-6.2', '26-6.3', '26-6.4', '26-7.1', '26-7.2', '26-7.3', '26-7.4', '26-8.1', '26-8.2', '26-8.3', '26-8.4', '26-9.1', '26-9.2', '26-9.3', '26-9.4', '26_10_1', '26_10_2', '26_10_3'];
+      let frame = 0;
+
+      // 19 张卡片 + 1 个结尾寄语 = 20 个节点，节点之间的间隔统一为 FADE_INTERVAL
+      const TOTAL_CARDS = 19;
+      const TOTAL_STEPS = TOTAL_CARDS + 1;
+      const FADE_INTERVAL = .01;
+      const PHASE_RANGE = (1 / TOTAL_STEPS - FADE_INTERVAL) / 2;
+
+      function render() {
+        frame = 0;
+        const bounds = track.getBoundingClientRect();
+        const distance = Math.max(1, track.offsetHeight - window.innerHeight);
+        const progress = Math.max(0, Math.min(1, -bounds.top / distance));
+        scene.style.setProperty('--scene-progress', progress.toFixed(4));
+        range.value = String(Math.round(progress * 1000));
+
+        cards.forEach((card, index) => {
+          const center = (index + 1) / TOTAL_STEPS;
+          const phase = (progress - center) / PHASE_RANGE;
+          const absPhase = Math.min(1, Math.abs(phase));
+          const t = Math.max(0, (absPhase - .4) / .6);
+          const visibility = Math.max(0, 1 - t * t * (3 - 2 * t));
+
+          const x = parseFloat(getComputedStyle(card).getPropertyValue('--x')) || -50;
+          const y = parseFloat(getComputedStyle(card).getPropertyValue('--y')) || -50;
+          const scale = .82 + visibility * .18;
+          card.style.opacity = visibility.toFixed(3);
+          card.style.transform = `translate3d(${x}%, ${y + (1 - visibility) * 22}%, 0) scale(${scale})`;
+          card.classList.toggle('is-visible', visibility > .015);
+        });
+
+        planets.forEach(planet => {
+          const depth = Number(planet.dataset.depth);
+          planet.style.transform = `translate3d(${Math.sin(progress * Math.PI * 2) * depth * 32}px, ${progress * depth * -90}px, 0) scale(${1 + progress * depth * .18})`;
+        });
+
+        if (closing) {
+          // 最后一个节点（寄语）开始淡入的时机 = 最后一张照片的淡出终点 + FADE_INTERVAL
+          const messageStart = TOTAL_CARDS / TOTAL_STEPS + PHASE_RANGE + FADE_INTERVAL;
+          const c = Math.max(0, Math.min(1, (progress - messageStart) / (1 - messageStart)));
+          const eased = c * c * (3 - 2 * c);
+          closing.style.opacity = eased.toFixed(3);
+          closing.style.transform = `translate(-50%, -50%) scale(${(.96 + .04 * eased).toFixed(3)})`;
+        }
+
+        const activeStep = Math.min(TOTAL_CARDS, Math.max(0, Math.round(progress * TOTAL_STEPS)));
+        label.textContent = titles[activeStep];
+
+        // Intro：和所有卡片用同样的平滑过渡曲线
+        const introPhase = progress / PHASE_RANGE;
+        const introAbsPhase = Math.min(1, Math.abs(introPhase));
+        const introT = Math.max(0, (introAbsPhase - .4) / .6);
+        const introVisibility = Math.max(0, 1 - introT * introT * (3 - 2 * introT));
+        const introEl = document.querySelector('.intro');
+        if (introEl) introEl.style.opacity = introVisibility.toFixed(3);
+      }
+
+      function scheduleRender() { if (!frame) frame = requestAnimationFrame(render); }
+      window.addEventListener('scroll', scheduleRender, { passive: true });
+      window.addEventListener('resize', scheduleRender);
+      range.addEventListener('input', () => {
+        const distance = track.offsetHeight - window.innerHeight;
+        const targetProgress = Number(range.value) / 1000;
+        window.scrollTo({ top: track.offsetTop + distance * targetProgress, behavior: 'smooth' });
+      });
+      render();
+    })();
+
+    // 返回主界面：标记跳过开机加载动画，保证回到的是主卡片而不是启动页
+    (() => {
+      const backButton = document.querySelector('#back-button');
+      if (!backButton) return;
+      backButton.addEventListener('click', () => {
+        try { sessionStorage.setItem('birthday.skipBoot', '1'); } catch (err) { /* 忽略 */ }
+      });
+    })();
+  </script>
+</body>
+</html>
